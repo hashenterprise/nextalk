@@ -35,18 +35,15 @@ const generateMeetingId = () => {
 // Initialize Agora client
 const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
 
-// Define interfaces for type safety
+// Update the interface to match Next.js 13+ types
 interface PageProps {
-  params: {
-    meetingId?: string;
-  };
-  searchParams?: { [key: string]: string | string[] | undefined };
+  meetingId?: string;
 }
 
-export default function MeetingsPage({ params, searchParams: queryParams }: PageProps) {
+export default function MeetingsPage({ meetingId }: PageProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const meetingId = params?.meetingId || searchParams.get('id');
+  const currentMeetingId = meetingId || searchParams.get('id');
   const userId = auth.currentUser?.uid;
   const [userName, setUserName] = useState('');
   
@@ -123,7 +120,7 @@ export default function MeetingsPage({ params, searchParams: queryParams }: Page
     
     getUserProfile();
     
-    if (meetingId) {
+    if (currentMeetingId) {
       fetchMeetingDetails();
     } else {
       setIsLoading(false);
@@ -145,21 +142,21 @@ export default function MeetingsPage({ params, searchParams: queryParams }: Page
         leaveCall();
       }
     };
-  }, [userId, meetingId, fetchMeetingDetails, isJoined, leaveCall]);
+  }, [userId, currentMeetingId, fetchMeetingDetails, isJoined, leaveCall]);
 
   // Redirect if query parameter `id` is used instead of dynamic route
   useEffect(() => {
     const queryId = searchParams.get('id');
-    if (queryId && queryId !== meetingId) {
+    if (queryId && queryId !== currentMeetingId) {
       router.replace(`/meetings/${queryId}`);
     }
-  }, [searchParams, meetingId, router]);
+  }, [searchParams, currentMeetingId, router]);
   
   const fetchMeetingDetails = useCallback(async () => {
-    if (!meetingId) return;
+    if (!currentMeetingId) return;
 
     try {
-      const meetingRef = doc(db, 'meetings', meetingId);
+      const meetingRef = doc(db, 'meetings', currentMeetingId);
       const meetingSnap = await getDoc(meetingRef);
       
       if (meetingSnap.exists()) {
@@ -183,7 +180,7 @@ export default function MeetingsPage({ params, searchParams: queryParams }: Page
       console.error('Error fetching meeting details:', error);
       setIsLoading(false);
     }
-  }, [meetingId, userId]);
+  }, [currentMeetingId, userId]);
   
   const createMeeting = async () => {
     if (!userId) return;
@@ -235,7 +232,7 @@ export default function MeetingsPage({ params, searchParams: queryParams }: Page
   };
   
   const joinCall = async () => {
-    if (!meetingId || !meetingData) return;
+    if (!currentMeetingId || !meetingData) return;
     
     try {
       setIsLoading(true);
@@ -276,7 +273,7 @@ export default function MeetingsPage({ params, searchParams: queryParams }: Page
       
       // Update meeting participants in Firestore
       if (!meetingData.participants?.includes(userId)) {
-        const meetingRef = doc(db, 'meetings', meetingId);
+        const meetingRef = doc(db, 'meetings', currentMeetingId);
         await setDoc(meetingRef, {
           participants: [...meetingData.participants, userId]
         }, { merge: true });
@@ -370,7 +367,7 @@ export default function MeetingsPage({ params, searchParams: queryParams }: Page
       setRecordingSid(data.sid);
       
       // Update in Firestore
-      const meetingRef = doc(db, 'meetings', meetingId);
+      const meetingRef = doc(db, 'meetings', currentMeetingId);
       await setDoc(meetingRef, {
         isRecording: true,
         recordingResourceId: data.resourceId,
@@ -404,11 +401,11 @@ export default function MeetingsPage({ params, searchParams: queryParams }: Page
       });
       
       // Get recording URL from backend
-      const response = await fetch(`/api/recording/${meetingId}/info`);
+      const response = await fetch(`/api/recording/${currentMeetingId}/info`);
       const recordingData = await response.json();
       
       // Update in Firestore
-      const meetingRef = doc(db, 'meetings', meetingId);
+      const meetingRef = doc(db, 'meetings', currentMeetingId);
       await setDoc(meetingRef, {
         isRecording: false,
         recordingResourceId: null,
@@ -490,7 +487,7 @@ export default function MeetingsPage({ params, searchParams: queryParams }: Page
   };
   
   const copyMeetingLink = () => {
-    const link = `${window.location.origin}/meetings/${meetingId}`;
+    const link = `${window.location.origin}/meetings/${currentMeetingId}`;
     navigator.clipboard.writeText(link);
     // You could add a toast notification here
   };
@@ -515,7 +512,7 @@ export default function MeetingsPage({ params, searchParams: queryParams }: Page
     );
   }
   
-  if (meetingId && !isJoined) {
+  if (currentMeetingId && !isJoined) {
     return (
       <div className="h-full flex flex-col bg-gray-900">
         <div className="flex items-center justify-between p-4 border-b border-gray-800">
@@ -539,7 +536,7 @@ export default function MeetingsPage({ params, searchParams: queryParams }: Page
           </div>
           
           <h2 className="text-2xl font-bold mb-2">{meetingData?.title || 'Join Meeting'}</h2>
-          <p className="text-gray-400 mb-6">Meeting ID: {meetingId}</p>
+          <p className="text-gray-400 mb-6">Meeting ID: {currentMeetingId}</p>
           
           <button 
             onClick={joinCall}
@@ -553,7 +550,7 @@ export default function MeetingsPage({ params, searchParams: queryParams }: Page
     );
   }
   
-  if (!meetingId) {
+  if (!currentMeetingId) {
     return (
       <div className="h-full flex flex-col bg-gray-900">
         <div className="border-b border-gray-800 px-4 py-3 flex items-center justify-between">
