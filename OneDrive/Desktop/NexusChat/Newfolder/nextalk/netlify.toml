@@ -1,0 +1,22 @@
+[build]
+  command = "npm run build"
+  base = "OneDrive/Desktop/NexusChat/Newfolder/nextalk"
+  publish = ".next"
+  functions = "netlify/functions"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[context.production.environment]
+  NEXT_PUBLIC_SUPABASE_URL = "https://sooipyegapuclrgeaunu.supabase.co"
+  NEXT_PUBLIC_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNvb2lweWVnYXB1Y2xyZ2VhdW51Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2MzI4NDgsImV4cCI6MjA2MDIwODg0OH0.TczbBEInmyTGeLSDZGcGiUyfu5QjRWwEExr3S-6FPls"
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = "pk_test_Y29taWMtY293YmlyZC05MC5jbGVyay5hY2NvdW50cy5kZXYk"
+  NEXT_PUBLIC_FIREBASE_API_KEY = "AIzaSyAfnht6qbd2pjBTi8-8gGFkNY11d2igXfY"
+  NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN = "nexttalk-59fef.firebaseapp.com"
+  NEXT_PUBLIC_FIREBASE_PROJECT_ID = "nexttalk-59fef"
+  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET = "nexttalk-59fef.appspot.com"
+  NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID = "1041026074405"
+  NEXT_PUBLIC_FIREBASE_APP_ID = "1:1041026074405:web:36b121d3f029c1a08efccc"
+  NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID = "G-WTPHQVZ4ZD"
+  AGORA_APP_ID = "2af010588bab409290e471bac71b509a"
+  AGORA_APP_CERTIFICATE = "1020354697014603bb10daf392975bb6"
